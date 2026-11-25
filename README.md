@@ -91,5 +91,23 @@ What this does and doesn't show:
   would predict. But a 16× larger state (N = 8 → 128) buys at most 3 points. At this
   budget the nominal state size is not the binding limit; 2 layers and 4,000 steps are.
 
-The `lm` experiment (byte-level LM) hadn't finished when the session hit its time
-limit. It will be added when re-run.
+### Byte-level LM ([`results/lm_runs.jsonl`](results/lm_runs.jsonl))
+
+The task is the Python standard library's source, with context 512, batch 16 and 3,000
+steps, in fp32: the T4 has no bf16. There is a single seed.
+
+| mixer | params | val bits/byte | training throughput | wall time |
+|---|---|---|---|---|
+| attention | 3.48M | **1.325** | 94.5k tok/s | 4.4 min |
+| Mamba-2, N = 64 | 3.91M | 1.472 | 44.9k tok/s | 9.2 min |
+
+- **At this scale attention wins on both quality and speed.** Its validation loss is 0.147
+  bits/byte lower, despite 11% fewer parameters, and it trains 2.1× faster.
+- The speed gap is mostly about implementation. The attention model uses PyTorch's fused
+  SDPA kernel. Mamba-2 runs the chunked SSD algorithm as plain PyTorch einsums (chunk 64),
+  with no fused scan kernel like the official Triton one.
+- The quality gap fits the recall results above. Source code is full of exact copies
+  (identifiers, repeated lines) that attention can look up and a fixed state must
+  compress. But this is 3,000 steps at 3.5M parameters, not a scaling claim.
+- A third config, Mamba-2 with no MLP and 8 layers, did not finish within the 15-minute
+  budget and is not reported.
