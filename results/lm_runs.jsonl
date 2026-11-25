@@ -1,0 +1,2 @@
+{"exp": "lm", "name": "attention", "K": null, "d_state": 64, "mixer": "attention", "steps": 3000, "minutes": 4.36703888575236, "val_bpb": 1.3254277803879393, "params": 3480832, "train_tok_per_s": 94459.39914695769, "seconds": 260.1752734184265}
+{"exp": "lm", "name": "mamba2 N=64", "K": null, "d_state": 64, "mixer": "mamba2", "steps": 3000, "minutes": 9.248541168371837, "val_bpb": 1.472002041179313, "params": 3905472, "train_tok_per_s": 44871.30763052439, "seconds": 547.6996614933014}
