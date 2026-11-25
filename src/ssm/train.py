@@ -102,7 +102,7 @@ def train_lm(cfg: Config, steps: int, device: str, ctx: int = 512, bs: int = 16,
     gen = torch.Generator().manual_seed(seed)
     model = LM(cfg).to(device)
     opt = torch.optim.AdamW(model.parameters(), lr=lr, betas=(0.9, 0.95), weight_decay=0.1)
-    amp = device == "cuda"
+    amp = device == "cuda" and torch.cuda.get_device_capability()[0] >= 8  # bf16 needs sm80+
     t0 = time.time()
     for step in range(1, steps + 1):
         for g in opt.param_groups:
