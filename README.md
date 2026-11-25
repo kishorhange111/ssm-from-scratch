@@ -49,4 +49,47 @@ python -m ssm.train --exp lm   --device cuda --out results
 python -m ssm.bench --out results
 ```
 
-**Results are pending** from the Colab runs.
+## Results (Tesla T4)
+
+### Decode cost against context length ([`results/decode_Tesla_T4.md`](results/decode_Tesla_T4.md))
+
+fp16, batch 8, d_model 256, 4 layers.
+
+| context | attention step (KV cache) | Mamba-2 step | KV cache / seq | SSM state / seq |
+|---|---|---|---|---|
+| 256 | 2.49 ms | 3.72 ms | 1.0 MiB | 271 KiB |
+| 1,024 | 2.32 ms | 3.72 ms | 4.0 MiB | 271 KiB |
+| 4,096 | 4.26 ms | 3.72 ms | 16.0 MiB | 271 KiB |
+| 16,384 | 15.70 ms | 3.72 ms | 64.0 MiB | 271 KiB |
+| 65,536 | 65.23 ms | 3.72 ms | 256.0 MiB | 271 KiB |
+
+The Mamba-2 step is **flat** in context length, while the attention step grows linearly
+once the KV cache stops fitting in cache. Attention is faster at short contexts; the crossover lies between 1k and 4k tokens, and attention is
+17.5× slower at 65k. The per-sequence decode state is 271 KiB against a 256 MiB KV cache,
+almost 1,000× smaller, which is what lets recurrent models batch long contexts.
+
+### Associative recall (MQAR) ([`results/mqar_runs.jsonl`](results/mqar_runs.jsonl))
+
+These are 2-layer, d = 128 models with 4,000 steps × batch 64 each, a **single seed**, and
+33 GPU-minutes in total. Accuracy is on the query positions; chance is 1/128 = 0.8%.
+
+| mixer | params | K = 8 | K = 16 | K = 32 | K = 64 |
+|---|---|---|---|---|---|
+| attention | 296k | 35.3% | **100.0%** | 15.5% | 10.5% |
+| Mamba-2, N = 8 | 239k | 34.5% | 22.3% | 7.4% | 1.2% |
+| Mamba-2, N = 32 | 252k | 33.1% | 18.8% | 9.8% | 4.1% |
+| Mamba-2, N = 128 | 303k | 35.2% | 22.2% | 10.1% | 3.7% |
+
+What this does and doesn't show:
+- **The recall gap appears where attention trains successfully.** At K = 16 attention is
+  perfect, and every Mamba-2 variant is at 22% or below.
+- **Attention's results are not monotone in K.** It fails at K = 8 but succeeds at K = 16,
+  so its failures here are optimisation, not capacity. A lookup circuit forms abruptly,
+  and in three of the four runs it hadn't formed within 4,000 steps. More steps or seeds
+  are needed before reading anything into attention at K ∈ {8, 32, 64}.
+- **Mamba-2 degrades smoothly with K** (about 34% → 21% → 9% → 3%), as a fixed-size state
+  would predict. But a 16× larger state (N = 8 → 128) buys at most 3 points. At this
+  budget the nominal state size is not the binding limit; 2 layers and 4,000 steps are.
+
+The `lm` experiment (byte-level LM) hadn't finished when the session hit its time
+limit. It will be added when re-run.

@@ -1,0 +1,37 @@
+[
+ {
+  "context": 256,
+  "attention_ms": 2.489501495361328,
+  "mamba2_ms": 3.7156231689453123,
+  "kv_bytes_per_seq": 1048576,
+  "ssm_state_bytes_per_seq": 277504
+ },
+ {
+  "context": 1024,
+  "attention_ms": 2.32300537109375,
+  "mamba2_ms": 3.7156231689453123,
+  "kv_bytes_per_seq": 4194304,
+  "ssm_state_bytes_per_seq": 277504
+ },
+ {
+  "context": 4096,
+  "attention_ms": 4.255031127929687,
+  "mamba2_ms": 3.7156231689453123,
+  "kv_bytes_per_seq": 16777216,
+  "ssm_state_bytes_per_seq": 277504
+ },
+ {
+  "context": 16384,
+  "attention_ms": 15.702054443359375,
+  "mamba2_ms": 3.7156231689453123,
+  "kv_bytes_per_seq": 67108864,
+  "ssm_state_bytes_per_seq": 277504
+ },
+ {
+  "context": 65536,
+  "attention_ms": 65.2278564453125,
+  "mamba2_ms": 3.7156231689453123,
+  "kv_bytes_per_seq": 268435456,
+  "ssm_state_bytes_per_seq": 277504
+ }
+]
