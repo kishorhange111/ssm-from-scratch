@@ -140,6 +140,8 @@ class LM(nn.Module):
         )  # fmt: skip
         self.norm = RMSNorm(c.d_model)
         nn.init.normal_(self.emb.weight, std=0.02)
+        if self.pos is not None:  # default N(0, 1) would swamp the 0.02-scale token embeddings
+            nn.init.normal_(self.pos.weight, std=0.02)
 
     def forward(self, idx):
         x = self.emb(idx)
