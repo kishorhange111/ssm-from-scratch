@@ -64,7 +64,7 @@ fp16, batch 8, d_model 256, 4 layers.
 | 65,536 | 65.23 ms | 3.72 ms | 256.0 MiB | 271 KiB |
 
 The Mamba-2 step is **flat** in context length, while the attention step grows linearly
-once the KV cache stops fitting in cache. Attention is faster up to about 4k tokens and
+once the KV cache stops fitting in cache. Attention is faster at short contexts; the crossover lies between 1k and 4k tokens, and attention is
 17.5× slower at 65k. The per-sequence decode state is 271 KiB against a 256 MiB KV cache,
 almost 1,000× smaller, which is what lets recurrent models batch long contexts.
 
